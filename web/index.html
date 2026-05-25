@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://auth.barneyparker.com; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+  <title>WC Baseline</title>
+  <link rel="stylesheet" href="/styles/global.css">
+  <script type="module" src="/lib/auth.js"></script>
+  <script type="module" src="/components/wc-header.js"></script>
+  <script type="module" src="/components/wc-footer.js"></script>
+  <script type="module" src="/components/wc-spinner.js"></script>
+  <script type="module" src="/components/wc-card.js"></script>
+  <script type="module" src="/components/wc-api-status.js"></script>
+  <script type="module" src="/lib/init.js"></script>
+</head>
+<body>
+  <wc-header></wc-header>
+
+  <main>
+    <section class="hero">
+      <div class="logo-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <h1>WC Baseline</h1>
+      <p>A reusable starting point for web-component based, multi-page architecture sites.</p>
+      <div id="welcome-message" style="display: none; margin-top: 1rem; font-size: 0.875rem; color: var(--color-gray-500);"></div>
+    </section>
+
+    <section>
+      <h2>API Status</h2>
+      <wc-api-status></wc-api-status>
+    </section>
+  </main>
+
+  <wc-footer></wc-footer>
+</body>
+</html>

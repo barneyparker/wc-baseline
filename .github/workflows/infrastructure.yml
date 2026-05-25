@@ -1,0 +1,70 @@
+name: Infrastructure
+run-name: Infrastructure - ${{ github.event.head_commit.message || github.event.pull_request.title || github.ref_name }}
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  vars:
+    uses: ./.github/workflows/set-vars.yml
+
+  terraform:
+    needs: vars
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::993471332178:role/github-actions
+          aws-region: eu-west-1
+      - uses: hashicorp/setup-terraform@v3
+      - id: Init
+        run: cd infrastructure && terraform init -backend-config="key=wc-baseline/${{ needs.vars.outputs.environment }}.tfstate"
+      - id: Plan
+        run: |
+          export TF_VAR_project_url="${{ needs.vars.outputs.project_url }}"
+          export TF_VAR_environment="${{ needs.vars.outputs.environment }}"
+          export TF_VAR_account_id="${{ needs.vars.outputs.account_id }}"
+          cd infrastructure && terraform plan -out=tf.plan
+      - id: apply
+        run: |
+          export TF_VAR_project_url="${{ needs.vars.outputs.project_url }}"
+          export TF_VAR_environment="${{ needs.vars.outputs.environment }}"
+          export TF_VAR_account_id="${{ needs.vars.outputs.account_id }}"
+          cd infrastructure && terraform apply tf.plan
+
+  destroy:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.event.pull_request.base.ref != 'main'
+    needs: vars
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::993471332178:role/github-actions
+          aws-region: eu-west-1
+      - uses: hashicorp/setup-terraform@v3
+      - id: Init
+        run: cd infrastructure && terraform init -backend-config="key=wc-baseline/${{ needs.vars.outputs.environment }}.tfstate"
+      - id: PlanDestroy
+        run: |
+          export TF_VAR_project_url="${{ needs.vars.outputs.project_url }}"
+          export TF_VAR_environment="${{ needs.vars.outputs.environment }}"
+          export TF_VAR_account_id="${{ needs.vars.outputs.account_id }}"
+          cd infrastructure && terraform plan -destroy -out=tf.destroy.plan
+      - id: Destroy
+        run: |
+          export TF_VAR_project_url="${{ needs.vars.outputs.project_url }}"
+          export TF_VAR_environment="${{ needs.vars.outputs.environment }}"
+          export TF_VAR_account_id="${{ needs.vars.outputs.account_id }}"
+          cd infrastructure && terraform apply tf.destroy.plan

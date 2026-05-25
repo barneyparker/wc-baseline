@@ -1,0 +1,81 @@
+name: Functions
+run-name: Functions - ${{ github.event.head_commit.message || github.event.pull_request.title || github.ref_name }}
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - "functions/**"
+  workflow_dispatch:
+
+jobs:
+  vars:
+    uses: ./.github/workflows/set-vars.yml
+
+  discover:
+    needs: vars
+    runs-on: ubuntu-latest
+    outputs:
+      functions: ${{ steps.list.outputs.functions }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: list
+        run: |
+          FUNCTIONS=$(ls -d functions/*/ 2>/dev/null | sed 's|functions/||; s|/||' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "functions=$FUNCTIONS" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: [vars, discover]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        function: ${{ fromJSON(needs.discover.outputs.functions) }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::993471332178:role/github-actions
+          aws-region: eu-west-1
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::${{ needs.vars.outputs.account_id }}:role/DeploymentRole
+          aws-region: eu-west-1
+          role-chaining: true
+          role-skip-session-tagging: true
+
+      - run: |
+          set -euo pipefail
+          name=${{ matrix.function }}
+          function_name="${{ needs.vars.outputs.environment }}-${name}"
+
+          if ! aws lambda get-function --function-name "$function_name" > /dev/null 2>&1; then
+            echo "Function $function_name does not exist in this environment, skipping"
+            exit 0
+          fi
+
+          echo "::group::Deploying $name"
+
+          (
+            cd "functions/$name"
+
+            if [ -f package.json ]; then
+              npm install --production
+            fi
+
+            find . -type f -exec touch -t 010100002020.00 {} \;
+            find . -type d -exec touch -t 010100002020.00 {} \;
+
+            zip -Xqr "/tmp/${name}.zip" .
+          )
+
+          aws lambda update-function-code \
+            --function-name "$function_name" \
+            --zip-file "fileb:///tmp/${name}.zip"
+
+          rm "/tmp/${name}.zip"
+          echo "::endgroup::"

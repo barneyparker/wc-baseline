@@ -1,0 +1,37 @@
+name: Set Variables
+description: Sets environment, project_url, and account_id for use in other jobs
+on:
+  workflow_call:
+    outputs:
+      environment:
+        description: The environment name (prod for main, sanitized branch name otherwise)
+        value: ${{ jobs.set-vars.outputs.environment }}
+      project_url:
+        description: The project URL from GitHub context
+        value: ${{ jobs.set-vars.outputs.project_url }}
+      account_id:
+        description: The AWS account id for deployment
+        value: ${{ jobs.set-vars.outputs.account_id }}
+
+jobs:
+  set-vars:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.get_env.outputs.environment }}
+      project_url: ${{ steps.get_env.outputs.project_url }}
+      account_id: ${{ steps.get_env.outputs.account_id }}
+    steps:
+      - id: get_env
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+            # Sanitize branch name for use as environment identifier
+            # Remove special characters, replace with hyphens, limit length
+            SANITIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/-*/-/g' | sed 's/^-//' | sed 's/-$//' | tr '[:upper:]' '[:lower:]' | cut -c1-30)
+            echo "environment=$SANITIZED" >> $GITHUB_OUTPUT
+          fi
+          echo "account_id=813281204648" >> $GITHUB_OUTPUT
+      - id: set_project_url
+        run: echo "project_url=${{ github.server_url }}/${{ github.repository }}" >> $GITHUB_OUTPUT

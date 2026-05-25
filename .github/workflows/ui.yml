@@ -1,0 +1,61 @@
+name: UI
+run-name: UI - ${{ github.event.head_commit.message || github.event.pull_request.title || github.ref_name }}
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - "web/**"
+  workflow_dispatch:
+
+jobs:
+  vars:
+    uses: ./.github/workflows/set-vars.yml
+
+  deploy:
+    needs: vars
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::993471332178:role/github-actions
+          aws-region: eu-west-1
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::${{ needs.vars.outputs.account_id }}:role/DeploymentRole
+          aws-region: eu-west-1
+          role-chaining: true
+          role-skip-session-tagging: true
+
+      - id: deploy-info
+        run: |
+          DOMAIN="barneyparker.com"
+          if [[ "${{ needs.vars.outputs.environment }}" == "prod" ]]; then
+            echo "bucket_name=wcbase-web-${DOMAIN}" >> "$GITHUB_OUTPUT"
+            echo "hostname=wcbase.${DOMAIN}" >> "$GITHUB_OUTPUT"
+          else
+            echo "bucket_name=wcbase-${{ needs.vars.outputs.environment }}-web-${DOMAIN}" >> "$GITHUB_OUTPUT"
+            echo "hostname=wcbase-${{ needs.vars.outputs.environment }}.${DOMAIN}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - run: |
+          aws s3 sync web/ "s3://${{ steps.deploy-info.outputs.bucket_name }}" \
+            --delete \
+            --exclude '.*' \
+            --cache-control 'public,max-age=31536000,immutable'
+
+      - run: |
+          DIST_ID=$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?contains(Aliases.Items[0], '${{ steps.deploy-info.outputs.hostname }}')].Id" \
+            --output text)
+          if [[ -n "$DIST_ID" && "$DIST_ID" != "None" ]]; then
+            aws cloudfront create-invalidation \
+              --distribution-id "$DIST_ID" \
+              --paths '/*'
+          fi
