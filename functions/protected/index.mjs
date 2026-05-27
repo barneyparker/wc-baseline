@@ -1,23 +1,31 @@
-/**
- * @import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
- */
+const AUTH_ORIGIN = 'https://auth.barneyparker.com';
 
-/**
- * Protected endpoint – only reachable via the JWT authorizer.
- * Returns the authenticated user's subject claim.
- *
- * @param {APIGatewayEvent & { requestContext: { authorizer: { jwt: { claims: Record<string, string> } } } }} event
- * @returns {Promise<APIGatewayProxyResult>}
- */
 export const handler = async (event) => {
   const claims = event.requestContext?.authorizer?.jwt?.claims || {};
+  const sub = claims.sub;
+  const authHeader = event.headers?.authorization || event.headers?.Authorization || '';
+
+  let user = { sub };
+
+  if (authHeader) {
+    try {
+      const res = await fetch(`${AUTH_ORIGIN}/api/v1/auth/me`, {
+        headers: { 'Authorization': authHeader },
+      });
+      if (res.ok) {
+        user = await res.json();
+      }
+    } catch (err) {
+      console.error('Failed to fetch user:', err.message);
+    }
+  }
 
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      userId: claims.sub,
       message: 'You are authenticated!',
+      user,
       timestamp: new Date().toISOString(),
     }),
   };
