@@ -48,7 +48,7 @@ jobs:
           aws s3 sync web/ "s3://${{ steps.deploy-info.outputs.bucket_name }}" \
             --delete \
             --exclude '.*' \
-            --cache-control 'public,max-age=31536000,immutable'
+            --cache-control 'public,max-age=0,must-revalidate'
 
       - run: |
           DIST_ID=$(aws cloudfront list-distributions \
