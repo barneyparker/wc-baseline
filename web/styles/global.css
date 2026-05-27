@@ -35,21 +35,21 @@ body {
 
 main {
   margin: 0 auto;
-  padding: 3rem 1.5rem;
+  padding: 2rem 1rem;
   max-width: 48rem;
 }
 
 .hero {
   text-align: center;
-  padding: 4rem 1.5rem 3rem;
+  padding: 2.5rem 1rem 2rem;
 }
 
 .hero .logo-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 4rem;
-  height: 4rem;
+  width: 3.5rem;
+  height: 3.5rem;
   border-radius: 1rem;
   background: linear-gradient(135deg, var(--color-primary), #7c3aed);
   color: #fff;
@@ -57,8 +57,8 @@ main {
 }
 
 .hero h1 {
-  font-size: 2.5rem;
-  margin: 1.25rem 0 0.5rem;
+  font-size: 1.75rem;
+  margin: 1rem 0 0.5rem;
   background: linear-gradient(135deg, var(--color-gray-800), var(--color-primary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -67,21 +67,34 @@ main {
 
 .hero p {
   color: var(--color-gray-500);
-  font-size: 1.15rem;
+  font-size: 1rem;
   line-height: 1.6;
   max-width: 32rem;
   margin: 0 auto;
 }
 
+@media (min-width: 640px) {
+  main { padding: 3rem 1.5rem; }
+  .hero { padding: 4rem 1.5rem 3rem; }
+  .hero .logo-icon { width: 4rem; height: 4rem; }
+  .hero h1 { font-size: 2.5rem; }
+  .hero p { font-size: 1.15rem; }
+}
+
 section {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   text-align: center;
 }
 
 section h2 {
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: var(--color-gray-600);
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  section { margin-bottom: 3rem; }
+  section h2 { font-size: 1.25rem; margin-bottom: 1rem; }
 }
 
 a {

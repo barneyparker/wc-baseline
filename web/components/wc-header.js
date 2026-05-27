@@ -29,7 +29,7 @@ class WCHeader extends HTMLElement {
         header {
           border-bottom: 1px solid #e2e8f0;
           background: #fff;
-          padding: 0 1.5rem;
+          padding: 0 1rem;
         }
         nav {
           max-width: 48rem;
@@ -38,41 +38,48 @@ class WCHeader extends HTMLElement {
           align-items: center;
           justify-content: space-between;
           height: 3.5rem;
+          gap: 0.5rem;
         }
         .logo {
           font-weight: 700;
-          font-size: 1.1rem;
+          font-size: 1rem;
           text-decoration: none;
           color: #2563eb;
+          white-space: nowrap;
         }
         .nav-links {
           display: flex;
           align-items: center;
-          gap: 1.25rem;
+          gap: 0.75rem;
         }
         .nav-links a {
           text-decoration: none;
           color: #475569;
           font-weight: 600;
-          font-size: 0.875rem;
+          font-size: 0.8125rem;
         }
         .nav-links a:hover { color: #2563eb; }
         .user-name {
-          font-size: 0.875rem;
+          font-size: 0.8125rem;
           color: #64748b;
+          max-width: 6rem;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
         .btn {
           font: inherit;
-          font-size: 0.875rem;
+          font-size: 0.8125rem;
           font-weight: 600;
-          padding: 0.35rem 0.8rem;
+          padding: 0.3rem 0.6rem;
           border-radius: 0.375rem;
           cursor: pointer;
           border: none;
           display: inline-flex;
           align-items: center;
-          gap: 0.4rem;
+          gap: 0.35rem;
           transition: background 0.15s;
+          white-space: nowrap;
         }
         .btn:disabled {
           cursor: default;
@@ -91,6 +98,7 @@ class WCHeader extends HTMLElement {
         .google-icon {
           flex-shrink: 0;
         }
+        .btn-label { display: none; }
         .btn-spinner {
           display: inline-block;
           width: 1rem;
@@ -101,6 +109,17 @@ class WCHeader extends HTMLElement {
           animation: btn-spin 0.6s linear infinite;
         }
         @keyframes btn-spin { to { transform: rotate(360deg); } }
+        @media (min-width: 480px) {
+          .btn-label { display: inline; }
+        }
+        @media (min-width: 640px) {
+          header { padding: 0 1.5rem; }
+          .logo { font-size: 1.1rem; }
+          .nav-links { gap: 1.25rem; }
+          .nav-links a { font-size: 0.875rem; }
+          .user-name { font-size: 0.875rem; max-width: none; }
+          .btn { font-size: 0.875rem; padding: 0.35rem 0.8rem; gap: 0.4rem; }
+        }
       </style>
       <header>
         <nav>
@@ -121,7 +140,7 @@ class WCHeader extends HTMLElement {
                     <path fill="#FBBC05" d="M10.54 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.77.87 7.35 2.56 10.56l7.98-5.97z"/>
                     <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.97C6.51 42.62 14.62 48 24 48z"/>
                   </svg>
-                  <span>Log in with Google</span>
+                  <span class="btn-label">Log in with Google</span>
                 </button>`
             }
           </div>

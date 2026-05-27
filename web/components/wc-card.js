@@ -20,14 +20,18 @@ template.innerHTML = `
       overflow: hidden;
     }
     ::slotted([slot="header"]) {
-      padding: 0.75rem 1rem;
+      padding: 0.6rem 0.75rem;
       font-weight: 600;
-      font-size: 0.875rem;
+      font-size: 0.8125rem;
       color: #475569;
       border-bottom: 1px solid #e2e8f0;
       background: #f8fafc;
     }
-    .body { padding: 1rem; }
+    .body { padding: 0.75rem; }
+    @media (min-width: 640px) {
+      ::slotted([slot="header"]) { padding: 0.75rem 1rem; font-size: 0.875rem; }
+      .body { padding: 1rem; }
+    }
   </style>
   <div class="card">
     <slot name="header"></slot>

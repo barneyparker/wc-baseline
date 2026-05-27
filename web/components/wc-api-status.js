@@ -5,23 +5,31 @@
 const template = document.createElement('template');
 template.innerHTML = `
   <style>
-    :host { display: block; }
-    .status {
-      width: fit-content;
-      margin: 0 auto;
-      padding: 1.25rem;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.375rem;
-      background: #fff;
-      text-align: left;
-    }
-    pre {
-      margin: 0;
-      font-family: ui-monospace, monospace;
-      font-size: 0.875rem;
-      color: #475569;
-    }
-    .error { color: #dc2626; }
+        :host { display: block; }
+        .status {
+          width: 100%;
+          max-width: 32rem;
+          margin: 0 auto;
+          padding: 1rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 0.375rem;
+          background: #fff;
+          text-align: left;
+          overflow-x: auto;
+        }
+        pre {
+          margin: 0;
+          font-family: ui-monospace, monospace;
+          font-size: 0.8125rem;
+          color: #475569;
+          white-space: pre-wrap;
+          word-break: break-all;
+        }
+        .error { color: #dc2626; }
+        @media (min-width: 640px) {
+          .status { padding: 1.25rem; width: fit-content; }
+          pre { font-size: 0.875rem; }
+        }
   </style>
   <div class="status">
     <wc-spinner id="spinner"></wc-spinner>

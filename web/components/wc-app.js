@@ -13,18 +13,20 @@ template.innerHTML = `
       flex-direction: column;
       align-items: center;
       gap: 0.75rem;
-      padding: 3rem 1.5rem;
+      padding: 2rem 0;
       text-align: center;
     }
     .profile wc-card {
       width: 100%;
       max-width: 28rem;
     }
-    .profile h1 { margin: 0; }
+    .profile h1 { margin: 0; font-size: 1.5rem; }
     .profile pre {
       text-align: left;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
     }
     .btn {
       font: inherit;
@@ -38,6 +40,11 @@ template.innerHTML = `
       color: #475569;
     }
     .btn:hover { background: #e2e8f0; }
+    @media (min-width: 640px) {
+      .profile { padding: 3rem 1.5rem; }
+      .profile h1 { font-size: inherit; }
+      .profile pre { font-size: 0.8rem; }
+    }
   </style>
   <div class="profile">
     <wc-spinner id="spinner"></wc-spinner>
