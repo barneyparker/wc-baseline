@@ -57,6 +57,7 @@ function clearUser() {
 }
 
 export async function exchangeCode(code) {
+  console.log('[auth] exchangeCode: calling /auth/token');
   const res = await fetch(AUTH_ORIGIN + '/api/v1/auth/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -64,21 +65,27 @@ export async function exchangeCode(code) {
   });
 
   if (!res.ok) {
+    console.log('[auth] exchangeCode: failed with status', res.status);
     throw new Error('Code exchange failed');
   }
 
-  return res.json();
+  const data = await res.json();
+  console.log('[auth] exchangeCode: success, token received');
+  return data;
 }
 
 async function tryRefresh() {
   const refreshToken = getRefreshToken();
+  console.log('[auth] tryRefresh: refresh token present:', !!refreshToken);
   if (!refreshToken) {
+    console.log('[auth] tryRefresh: no refresh token, redirecting to Google');
     clearUser();
     window.location.href = loginUrl();
     return false;
   }
 
   try {
+    console.log('[auth] tryRefresh: calling /auth/refresh');
     const res = await fetch(AUTH_ORIGIN + '/api/v1/auth/refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -86,16 +93,19 @@ async function tryRefresh() {
     });
 
     if (!res.ok) {
+      console.log('[auth] tryRefresh: refresh failed with status', res.status, ', redirecting to Google');
       clearUser();
       window.location.href = loginUrl();
       return false;
     }
 
     const { token, refreshToken: newRefresh } = await res.json();
+    console.log('[auth] tryRefresh: success, storing new tokens');
     storeToken(token);
     storeRefreshToken(newRefresh);
     return true;
-  } catch {
+  } catch (err) {
+    console.log('[auth] tryRefresh: fetch error:', err.message, ', redirecting to Google');
     clearUser();
     window.location.href = loginUrl();
     return false;
@@ -104,16 +114,20 @@ async function tryRefresh() {
 
 export async function fetchUser() {
   let token = getToken();
+  console.log('[auth] fetchUser: token present:', !!token);
   if (!token) return null;
 
+  console.log('[auth] fetchUser: calling /auth/me');
   let res = await fetch(AUTH_ORIGIN + '/api/v1/auth/me', {
     headers: { 'Authorization': 'Bearer ' + token },
   });
 
   if (res.status === 401) {
+    console.log('[auth] fetchUser: got 401, attempting refresh');
     const refreshed = await tryRefresh();
     if (refreshed) {
       token = getToken();
+      console.log('[auth] fetchUser: retrying /auth/me with new token');
       res = await fetch(AUTH_ORIGIN + '/api/v1/auth/me', {
         headers: { 'Authorization': 'Bearer ' + token },
       });
@@ -121,17 +135,20 @@ export async function fetchUser() {
   }
 
   if (!res.ok) {
+    console.log('[auth] fetchUser: failed with status', res.status, ', clearing user');
     clearUser();
     return null;
   }
 
   const user = await res.json();
+  console.log('[auth] fetchUser: success, user:', user.email);
   storeUser(user);
   return user;
 }
 
 export async function authFetch(url, options = {}) {
   let token = getToken();
+  console.log('[auth] authFetch:', url, 'token present:', !!token);
   if (!token) {
     return new Response(null, { status: 401 });
   }
@@ -142,10 +159,12 @@ export async function authFetch(url, options = {}) {
   let res = await fetch(url, { ...options, headers });
 
   if (res.status === 401) {
+    console.log('[auth] authFetch: got 401, attempting refresh');
     const refreshed = await tryRefresh();
     if (refreshed) {
       token = getToken();
       headers.set('Authorization', 'Bearer ' + token);
+      console.log('[auth] authFetch: retrying', url, 'with new token');
       res = await fetch(url, { ...options, headers });
     }
   }
