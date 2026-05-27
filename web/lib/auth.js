@@ -162,12 +162,10 @@ export function notifyAuthChanged() {
 }
 
 export function extractCodeFromUrl() {
-  const hash = window.location.hash;
-  if (!hash) return null;
-  const params = new URLSearchParams(hash.replace(/^#/, ''));
+  const params = new URLSearchParams(window.location.search);
   const code = params.get('code');
   if (code) {
-    history.replaceState(null, '', window.location.pathname + window.location.search);
+    history.replaceState(null, '', window.location.pathname);
   }
   return code;
 }
