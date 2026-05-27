@@ -18,7 +18,7 @@ export function storeToken(token) {
   localStorage.setItem(TOKEN_KEY, token);
 }
 
-function storeRefreshToken(token) {
+export function storeRefreshToken(token) {
   localStorage.setItem(REFRESH_TOKEN_KEY, token);
 }
 
@@ -187,6 +187,17 @@ export function extractCodeFromUrl() {
     history.replaceState(null, '', window.location.pathname);
   }
   return code;
+}
+
+export function extractTokensFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const refresh = params.get('refresh');
+  if (token && refresh) {
+    history.replaceState(null, '', window.location.pathname);
+    return { token, refresh };
+  }
+  return null;
 }
 
 export function loginUrl() {
