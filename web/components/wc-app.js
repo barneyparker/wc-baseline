@@ -2,7 +2,7 @@
  * @typedef {import('/lib/auth.js').User} User
  */
 
-import { requireAuth, fetchUser, getStoredUser, logout } from '/lib/auth.js';
+import { requireAuth, fetchUser, getStoredUser, logout, authFetch } from '/lib/auth.js';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -112,10 +112,7 @@ class WCApp extends HTMLElement {
   async #fetchProtected() {
     const el = this.shadowRoot.getElementById('api-result');
     try {
-      const token = localStorage.getItem('wc_token');
-      const res = await fetch('/api/v1/protected', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const res = await authFetch('/api/v1/protected');
       if (!res.ok) {
         el.textContent = `Error: ${res.status} ${res.statusText}`;
         return;
