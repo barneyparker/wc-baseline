@@ -9,7 +9,7 @@ export const handler = async (event) => {
 
   if (authHeader) {
     try {
-      const res = await fetch(`${AUTH_ORIGIN}/api/v1/auth/me`, {
+      const res = await fetch(`${AUTH_ORIGIN}/userinfo`, {
         headers: { 'Authorization': authHeader },
       });
       if (res.ok) {

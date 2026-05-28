@@ -57,8 +57,8 @@ function clearUser() {
 }
 
 export async function exchangeCode(code) {
-  console.log('[auth] exchangeCode: calling /auth/token');
-  const res = await fetch(AUTH_ORIGIN + '/api/v1/auth/token', {
+  console.log('[auth] exchangeCode: calling /token');
+  const res = await fetch(AUTH_ORIGIN + '/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code }),
@@ -85,8 +85,8 @@ async function tryRefresh() {
   }
 
   try {
-    console.log('[auth] tryRefresh: calling /auth/refresh');
-    const res = await fetch(AUTH_ORIGIN + '/api/v1/auth/refresh', {
+    console.log('[auth] tryRefresh: calling /token with refreshToken');
+    const res = await fetch(AUTH_ORIGIN + '/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
@@ -117,8 +117,8 @@ export async function fetchUser() {
   console.log('[auth] fetchUser: token present:', !!token);
   if (!token) return null;
 
-  console.log('[auth] fetchUser: calling /auth/me');
-  let res = await fetch(AUTH_ORIGIN + '/api/v1/auth/me', {
+  console.log('[auth] fetchUser: calling /userinfo');
+  let res = await fetch(AUTH_ORIGIN + '/userinfo', {
     headers: { 'Authorization': 'Bearer ' + token },
   });
 
@@ -127,8 +127,8 @@ export async function fetchUser() {
     const refreshed = await tryRefresh();
     if (refreshed) {
       token = getToken();
-      console.log('[auth] fetchUser: retrying /auth/me with new token');
-      res = await fetch(AUTH_ORIGIN + '/api/v1/auth/me', {
+      console.log('[auth] fetchUser: retrying /userinfo with new token');
+      res = await fetch(AUTH_ORIGIN + '/userinfo', {
         headers: { 'Authorization': 'Bearer ' + token },
       });
     }
@@ -202,12 +202,12 @@ export function extractTokensFromUrl() {
 
 export function loginUrl() {
   const origin = encodeURIComponent(window.location.origin);
-  return `${AUTH_ORIGIN}/api/v1/auth/google/login?redirect_uri=${origin}`;
+  return `${AUTH_ORIGIN}/google/authorize?redirect_uri=${origin}`;
 }
 
 export function logout() {
   clearUser();
-  navigator.sendBeacon('/api/v1/auth/logout', '');
+  navigator.sendBeacon('/revoke', '');
   window.location.href = '/';
 }
 
