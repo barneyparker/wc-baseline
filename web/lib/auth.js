@@ -78,9 +78,9 @@ async function tryRefresh() {
   const refreshToken = getRefreshToken();
   console.log('[auth] tryRefresh: refresh token present:', !!refreshToken);
   if (!refreshToken) {
-    console.log('[auth] tryRefresh: no refresh token, redirecting to Google');
+    console.log('[auth] tryRefresh: no refresh token, redirecting to /');
     clearUser();
-    window.location.href = loginUrl();
+    window.location.href = '/';
     return false;
   }
 
@@ -93,9 +93,9 @@ async function tryRefresh() {
     });
 
     if (!res.ok) {
-      console.log('[auth] tryRefresh: refresh failed with status', res.status, ', redirecting to Google');
+      console.log('[auth] tryRefresh: refresh failed with status', res.status, ', redirecting to /');
       clearUser();
-      window.location.href = loginUrl();
+      window.location.href = '/';
       return false;
     }
 
@@ -105,9 +105,9 @@ async function tryRefresh() {
     storeRefreshToken(newRefresh);
     return true;
   } catch (err) {
-    console.log('[auth] tryRefresh: fetch error:', err.message, ', redirecting to Google');
+    console.log('[auth] tryRefresh: fetch error:', err.message, ', redirecting to /');
     clearUser();
-    window.location.href = loginUrl();
+    window.location.href = '/';
     return false;
   }
 }
@@ -203,6 +203,11 @@ export function extractTokensFromUrl() {
 export function loginUrl() {
   const origin = encodeURIComponent(window.location.origin);
   return `${AUTH_ORIGIN}/google/authorize?redirect_uri=${origin}`;
+}
+
+export function loginUrlGithub() {
+  const origin = encodeURIComponent(window.location.origin);
+  return `${AUTH_ORIGIN}/github/authorize?redirect_uri=${origin}`;
 }
 
 export function logout() {
